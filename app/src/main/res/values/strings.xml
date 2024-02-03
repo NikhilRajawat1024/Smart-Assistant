@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Smart Assistant</string>
+    <string name="user_response">user_response</string>
+    <string name="bot_response">bot_response</string>
+</resources>
