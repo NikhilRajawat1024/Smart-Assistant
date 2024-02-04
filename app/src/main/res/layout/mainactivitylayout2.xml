@@ -16,7 +16,7 @@
         android:background="@drawable/cornersandborders">
         <TextView
             android:id="@+id/question"
-            android:layout_width="match_parent"
+            android:layout_width="320dp"
             android:layout_height="wrap_content"
             android:textSize="16sp"
             android:gravity="left"
@@ -41,8 +41,6 @@
                 android:textColor="@color/white"
                 android:textSize="16sp" />
         </ScrollView>
-
-
     </FrameLayout>
 
     <Button
@@ -55,13 +53,12 @@
         android:layout_marginBottom="130dp"
         />
 
+
     <pl.droidsonroids.gif.GifImageView
         android:id="@+id/listener"
         android:layout_width="300dp"
         android:layout_height="230dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerInParent="true"
-        android:layout_marginBottom="40dp"
+        android:layout_centerHorizontal="true"
         android:background="@drawable/blackholelistener"
         android:visibility="invisible" />
 

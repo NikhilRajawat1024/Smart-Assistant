@@ -96,6 +96,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+
         textToSpeech.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
             override fun onStart(utteranceId: String?) {
                 // Do nothing on start
@@ -117,7 +118,8 @@ class MainActivity : AppCompatActivity() {
 
 
 
-        Toast.makeText(this, "long press on the button to speak", Toast.LENGTH_SHORT).show()
+
+        Toast.makeText(this, "long press on the blue button to speak", Toast.LENGTH_SHORT).show()
 
         listenergif.visibility = View.INVISIBLE
 
@@ -212,6 +214,8 @@ class MainActivity : AppCompatActivity() {
                         openLinkedin()
                     } else if (userQuestion?.contains("open whatsapp") == true) {
                         openWhatsApp()
+                    }else if (userQuestion?.contains("open clock") == true || userQuestion?.contains("open alarm clock") == true){
+                        openApp("com.android.deskclock")
                     } else if (userQuestion?.contains("your name") == true) {
                         speakResponse("My name is autumn")
                         answertxt.text = "My name is autumn"
@@ -345,12 +349,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun getResponse(question: String, callback: (String) -> Unit) {
         val url = "https://api.openai.com/v1/chat/completions"
-        val apiKey = "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"
+        val apiKey = "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"
 
         val requestBody = JSONObject().apply {
             put("model", "gpt-3.5-turbo")
             put("messages", getMessages(question))
-            put("max_tokens", 1000)
+            put("max_tokens", 2000)
             put("temperature", 0)
         }
 
