@@ -350,12 +350,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun getResponse(question: String, callback: (String) -> Unit) {
         val url = "https://api.openai.com/v1/chat/completions"
-        val apiKey = "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"
+        val apiKey = "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"
 
         val requestBody = JSONObject().apply {
             put("model", "gpt-3.5-turbo")
             put("messages", getMessages(question))
-            put("max_tokens", 2000)
+            put("max_tokens", 300)
             put("temperature", 0)
         }
 
