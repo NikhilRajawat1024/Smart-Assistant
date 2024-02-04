@@ -355,7 +355,7 @@ class MainActivity : AppCompatActivity() {
         val requestBody = JSONObject().apply {
             put("model", "gpt-3.5-turbo")
             put("messages", getMessages(question))
-            put("max_tokens", 300)
+            put("max_tokens", 100)
             put("temperature", 0)
         }
 
