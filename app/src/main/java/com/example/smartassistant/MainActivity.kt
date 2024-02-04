@@ -10,11 +10,15 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import android.os.Looper
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
 import android.text.format.DateUtils
 import android.util.Log
 import android.view.MotionEvent
@@ -39,6 +43,7 @@ import okhttp3.Response
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
+import pl.droidsonroids.gif.GifImageView
 
 import java.io.IOException
 
@@ -53,8 +58,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private val client = OkHttpClient()
-    private lateinit var stpbutton: Button
     private lateinit var textToSpeech: TextToSpeech
+    private lateinit var soundwave:GifImageView
 
 
     private val allowPermission =
@@ -70,16 +75,19 @@ class MainActivity : AppCompatActivity() {
     lateinit var questiontxt: TextView
     lateinit var answertxt: TextView
     lateinit var resultbtn: Button
+
+
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.mainactivitylayout2)
         listenergif = findViewById(R.id.listener)
         questiontxt = findViewById(R.id.question)
         answertxt = findViewById(R.id.answer)
-        stpbutton = findViewById(R.id.stop)
+        soundwave = findViewById(R.id.soundwave)
         resultbtn = findViewById(R.id.button)
-        listenergif.setBackgroundResource(R.drawable.listeninggif)
+        listenergif.setBackgroundResource(R.drawable.blackholelistener)
+
         textToSpeech = TextToSpeech(this) { status ->
             if (status == TextToSpeech.SUCCESS) {
                 textToSpeech.language = Locale.getDefault()
@@ -87,9 +95,27 @@ class MainActivity : AppCompatActivity() {
                 Log.e("TTS", "Initialization failed")
             }
         }
-        stpbutton.setOnClickListener {
-            textToSpeech.stop()
-        }
+
+        textToSpeech.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+            override fun onStart(utteranceId: String?) {
+                // Do nothing on start
+            }
+
+            override fun onDone(utteranceId: String?) {
+                if (utteranceId == "response") {
+                    // Update visibility to INVISIBLE when speech is done
+                    runOnUiThread {
+                        soundwave.visibility = View.INVISIBLE
+                    }
+                }
+            }
+
+            override fun onError(utteranceId: String?) {
+                // Handle error if needed
+            }
+        })
+
+
 
         Toast.makeText(this, "long press on the button to speak", Toast.LENGTH_SHORT).show()
 
@@ -100,11 +126,13 @@ class MainActivity : AppCompatActivity() {
                 MotionEvent.ACTION_UP -> {
                     speechrecognizer.stopListening()
                     listenergif.visibility = View.INVISIBLE
+                    soundwave.visibility = View.VISIBLE
                     return@setOnTouchListener true
                 }
 
                 MotionEvent.ACTION_DOWN -> {
                     listenergif.visibility = View.VISIBLE
+                    soundwave.visibility = View.INVISIBLE
 
 
                     val userCommand = questiontxt.text.toString().lowercase(Locale.getDefault())
@@ -317,7 +345,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun getResponse(question: String, callback: (String) -> Unit) {
         val url = "https://api.openai.com/v1/chat/completions"
-        val apiKey = "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"
+        val apiKey = "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"
 
         val requestBody = JSONObject().apply {
             put("model", "gpt-3.5-turbo")
@@ -333,47 +361,58 @@ class MainActivity : AppCompatActivity() {
             .post(requestBody.toString().toRequestBody("application/json".toMediaTypeOrNull()))
             .build()
 
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                Log.e("error", "API failed", e)
-                callback("Error processing response")
-            }
 
-            override fun onResponse(call: Call, response: Response) {
-                val body = response.body?.string()
-
-                if (body != null) {
-                    Log.v("data", body)
-
-                    try {
-                        val jsonObject = JSONObject(body)
-                        if (jsonObject.has("choices")) {
-                            val jsonArray: JSONArray = jsonObject.getJSONArray("choices")
-                            val textResult = jsonArray.getJSONObject(0).getJSONObject("message")
-                                .getString("content")
-                            speakResponse(textResult)
-                            callback(textResult)
-                        } else {
-                            Log.e("error", "No 'choices' field in the JSON response")
-                            callback("Error processing response")
-                        }
-                    } catch (e: JSONException) {
-                        Log.e("error", "JSON parsing error", e)
-                        callback("Error processing response")
-                    }
-                } else {
-                    Log.v("data", "empty")
+        GlobalScope.launch(Dispatchers.IO) {
+            client.newCall(request).enqueue(object : Callback {
+                override fun onFailure(call: Call, e: IOException) {
+                    Log.e("error", "API failed", e)
                     callback("Error processing response")
                 }
-            }
-        })
+
+
+                override fun onResponse(call: Call, response: Response) {
+                    val body = response.body?.string()
+
+                    if (body != null) {
+                        Log.v("data", body)
+
+                        try {
+                            val jsonObject = JSONObject(body)
+                            if (jsonObject.has("choices")) {
+                                val jsonArray: JSONArray = jsonObject.getJSONArray("choices")
+                                val textResult = jsonArray.getJSONObject(0).getJSONObject("message")
+                                    .getString("content")
+                                speakResponse(textResult)
+                                callback(textResult)
+                                runOnUiThread {
+                                    soundwave.visibility = View.VISIBLE
+
+                                }
+                            } else {
+                                Log.e("error", "No 'choices' field in the JSON response")
+                                callback("Error processing response")
+                            }
+                        } catch (e: JSONException) {
+                            Log.e("error", "JSON parsing error", e)
+                            callback("Error processing response")
+                        }
+                    } else {
+                        Log.v("data", "empty")
+                        callback("Error processing response")
+                    }
+                }
+            })
+        }
     }
 
 
     private fun speakResponse(response: String) {
+        val params = HashMap<String, String>()
+        params[TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID] = "response"
 
-        textToSpeech.speak(response, TextToSpeech.QUEUE_FLUSH, null, null)
+        textToSpeech.speak(response, TextToSpeech.QUEUE_FLUSH, params)
     }
+
 
 
     private fun getMessages(userInput: String): JSONArray {
