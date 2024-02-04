@@ -119,7 +119,7 @@ class MainActivity : AppCompatActivity() {
 
 
 
-        Toast.makeText(this, "long press on the blue button to speak", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "long press on the purple button to speak", Toast.LENGTH_SHORT).show()
 
         listenergif.visibility = View.INVISIBLE
 
@@ -331,6 +331,7 @@ class MainActivity : AppCompatActivity() {
 
                 try {
                     startActivity(intent)
+                    speakResponse("opening whatsapp")
                 } catch (e: ActivityNotFoundException) {
                     // WhatsApp not installed or no activity can handle the send action
                     answertxt.text = "WhatsApp is not installed on your device."

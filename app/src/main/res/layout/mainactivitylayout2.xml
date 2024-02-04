@@ -59,8 +59,9 @@
         android:layout_width="300dp"
         android:layout_height="230dp"
         android:layout_centerHorizontal="true"
-        android:background="@drawable/blackholelistener"
-        android:visibility="invisible" />
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="40dp"
+        android:background="@drawable/blackholelistener" />
 
     <pl.droidsonroids.gif.GifImageView
         android:id="@+id/soundwave"
