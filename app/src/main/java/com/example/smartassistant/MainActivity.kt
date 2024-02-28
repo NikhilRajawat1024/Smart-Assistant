@@ -350,7 +350,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun getResponse(question: String, callback: (String) -> Unit) {
         val url = "https://api.openai.com/v1/chat/completions"
-        val apiKey = "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"
+        val apiKey = "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"
 
         val requestBody = JSONObject().apply {
             put("model", "gpt-3.5-turbo")
